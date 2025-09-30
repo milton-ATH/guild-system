@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guild System - Misiones Colaborativas</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="m-0 p-0">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        const GuildSystem = () => {
+          const [teacherMode, setTeacherMode] = useState(true);
+          const [selectedGuild, setSelectedGuild] = useState(null);
+          const [activeMission, setActiveMission] = useState(null);
+          const [missionStep, setMissionStep] = useState(0);
+          const [teamAnswers, setTeamAnswers] = useState({});
+          const [showResult, setShowResult] = useState(null);
+          
+          const [guilds, setGuilds] = useState([
+            { 
+              id: 1, 
+              name: 'Dragones', 
+              icon: '🐉', 
+              color: 'bg-red-100 border-red-500',
+              members: ['Ana García', 'Carlos López', 'María Torres', 'José Ramírez'],
+              points: 0,
+              completedMissions: [],
+              power: null
+            },
+            { 
+              id: 2, 
+              name: 'Fénix', 
+              icon: '🔥', 
+              color: 'bg-orange-100 border-orange-500',
+              members: ['Luis Martínez', 'Carmen Silva', 'Diego Rojas', 'Sofía Vega'],
+              points: 0,
+              completedMissions: [],
+              power: null
+            },
+            { 
+              id: 3, 
+              name: 'Leones', 
+              icon: '🦁', 
+              color: 'bg-yellow-100 border-yellow-500',
+              members: ['Pedro Morales', 'Laura Díaz', 'Miguel Castro', 'Elena Flores'],
+              points: 0,
+              completedMissions: [],
+              power: null
+            },
+            { 
+              id: 4, 
+              name: 'Águilas', 
+              icon: '🦅', 
+              color: 'bg-blue-100 border-blue-500',
+              members: ['Juan Pérez', 'Rosa Méndez', 'Pablo Vargas', 'Isabel Ruiz'],
+              points: 0,
+              completedMissions: [],
+              power: null
+            }
+          ]);
+
+          const missions = [
+            {
+              id: 'main1',
+              type: 'Principal',
+              title: 'Proyecto: Solución al Cambio Climático',
+              description: 'Diseñen una solución práctica para reducir la huella de carbono en su escuela',
+              points: 150,
+              difficulty: 'Alta',
+              timeEstimate: '3-4 clases',
+              icon: '🌍',
+              activity: {
+                type: 'project',
+                phases: [
+                  {
+                    title: 'Fase 1: Investigación',
+                    description: 'Identifiquen las principales fuentes de emisión de carbono en la escuela',
+                    task: '¿Cuáles son las 3 principales fuentes de emisión de CO₂ en una escuela típica?',
+                    options: [
+                      'Transporte, electricidad, desperdicio de alimentos',
+                      'Papel, agua, calefacción',
+                      'Computadoras, teléfonos, internet',
+                      'Deportes, recreo, cafetería'
+                    ],
+                    correct: 0,
+                    explanation: 'El transporte escolar, el uso de electricidad y el desperdicio de alimentos son las mayores fuentes de emisiones'
+                  },
+                  {
+                    title: 'Fase 2: Análisis',
+                    description: 'Calculen el impacto estimado de una solución',
+                    task: 'Si 200 estudiantes reducen uso de papel en 50%, ¿cuántos árboles salvan aprox. al año? (1 árbol = 8333 hojas)',
+                    options: [
+                      '2-3 árboles',
+                      '5-6 árboles',
+                      '10-12 árboles',
+                      '20-25 árboles'
+                    ],
+                    correct: 1,
+                    explanation: '200 estudiantes × 500 hojas/año × 0.5 = 50,000 hojas ÷ 8333 = ~6 árboles'
+                  },
+                  {
+                    title: 'Fase 3: Propuesta',
+                    description: 'Elijan la mejor estrategia de implementación',
+                    task: '¿Cuál estrategia tiene mayor impacto Y viabilidad?',
+                    options: [
+                      'Paneles solares (costoso, alta reducción)',
+                      'Programa de reciclaje + compostaje (bajo costo, impacto medio)',
+                      'Autos eléctricos para todos (muy costoso)',
+                      'Cerrar la escuela (imposible)'
+                    ],
+                    correct: 1,
+                    explanation: 'El reciclaje y compostaje tienen bajo costo, alta participación estudiantil y reducción significativa de residuos'
+                  }
+                ]
+              }
+            },
+            {
+              id: 'main2',
+              type: 'Principal',
+              title: 'Experimento: Ecosistema en Botella',
+              description: 'Creen un ecosistema cerrado y documenten su evolución',
+              points: 120,
+              difficulty: 'Media',
+              timeEstimate: '2 semanas',
+              icon: '🌿',
+              activity: {
+                type: 'project',
+                phases: [
+                  {
+                    title: 'Fase 1: Diseño',
+                    description: 'Planifiquen los componentes del ecosistema',
+                    task: '¿Qué elementos SON esenciales para un ecosistema cerrado funcional?',
+                    options: [
+                      'Solo plantas y agua',
+                      'Plantas, agua, tierra, aire y descomponedores',
+                      'Plantas, animales grandes, comida',
+                      'Agua, luz artificial, fertilizante químico'
+                    ],
+                    correct: 1,
+                    explanation: 'Un ecosistema necesita productores (plantas), medio (tierra/agua), aire y descomponedores para reciclar nutrientes'
+                  },
+                  {
+                    title: 'Fase 2: Hipótesis',
+                    description: 'Predigan qué sucederá en el ecosistema',
+                    task: 'Si el ecosistema está bien balanceado, después de 2 semanas:',
+                    options: [
+                      'Todo morirá por falta de oxígeno',
+                      'Las plantas producirán O₂, habrá condensación, ciclo continuo',
+                      'Necesitará agua extra constantemente',
+                      'Crecerán plantas enormes'
+                    ],
+                    correct: 1,
+                    explanation: 'En un sistema balanceado: plantas producen O₂, la transpiración crea agua condensada, y los descomponedores reciclan nutrientes'
+                  },
+                  {
+                    title: 'Fase 3: Documentación',
+                    description: 'Registren observaciones científicas',
+                    task: '¿Qué método de documentación es más completo y científico?',
+                    options: [
+                      'Descripción general al final',
+                      'Fotos + mediciones diarias + hipótesis vs resultados',
+                      'Solo fotos sin datos',
+                      'Memoria de lo que pasó'
+                    ],
+                    correct: 1,
+                    explanation: 'El método científico requiere datos cuantitativos (mediciones), cualitativos (fotos) y comparación con hipótesis inicial'
+                  }
+                ]
+              }
+            },
+            {
+              id: 'secondary1',
+              type: 'Secundaria',
+              title: 'Debate: ¿Tecnología en el Aula?',
+              description: 'Debatan los pros y contras del uso de tecnología en la educación',
+              points: 130,
+              difficulty: 'Alta',
+              timeEstimate: '2 clases',
+              icon: '💻',
+              activity: {
+                type: 'project',
+                phases: [
+                  {
+                    title: 'Fase 1: Preparación',
+                    description: 'Cada miembro investiga un aspecto diferente',
+                    task: '¿Cuál es el argumento MÁS fuerte A FAVOR de la tecnología en clase?',
+                    options: [
+                      'Es divertido y moderno',
+                      'Permite acceso a información ilimitada y personalización del aprendizaje',
+                      'Todos tienen celulares',
+                      'Los profesores lo usan'
+                    ],
+                    correct: 1,
+                    explanation: 'El acceso a recursos diversos y la personalización del ritmo de aprendizaje son beneficios pedagógicos comprobados'
+                  },
+                  {
+                    title: 'Fase 2: Contra-argumentos',
+                    description: 'Anticipen objeciones',
+                    task: '¿Cuál es la preocupación MÁS válida sobre tecnología en clase?',
+                    options: [
+                      'Es muy cara',
+                      'Distracción, adicción, y reducción de habilidades sociales cara a cara',
+                      'Los estudiantes saben más que los profesores',
+                      'Las baterías se agotan'
+                    ],
+                    correct: 1,
+                    explanation: 'Estudios muestran que el uso excesivo puede causar distracción, adicción a dispositivos y reducir interacciones sociales reales'
+                  },
+                  {
+                    title: 'Fase 3: Síntesis',
+                    description: 'Lleguen a una conclusión balanceada',
+                    task: '¿Cuál es la posición más razonable?',
+                    options: [
+                      'Prohibir toda tecnología',
+                      'Uso ilimitado de dispositivos',
+                      'Uso guiado con propósito pedagógico específico y tiempos definidos',
+                      'Cada quien decide'
+                    ],
+                    correct: 2,
+                    explanation: 'La evidencia apoya un uso intencional, supervisado y con propósito educativo claro, no uso libre sin límites'
+                  }
+                ]
+              }
+            },
+            {
+              id: 'secondary2',
+              type: 'Secundaria',
+              title: 'Cuento Colaborativo: Viaje en el Tiempo',
+              description: 'Escriban un cuento donde cada miembro aporta un personaje único',
+              points: 110,
+              difficulty: 'Media',
+              timeEstimate: '2-3 clases',
+              icon: '📖',
+              activity: {
+                type: 'project',
+                phases: [
+                  {
+                    title: 'Fase 1: Planificación',
+                    description: 'Definan estructura narrativa',
+                    task: 'Para que un cuento colaborativo funcione, necesitan primero:',
+                    options: [
+                      'Que cada uno escriba su parte sin hablar',
+                      'Acordar trama principal, época, conflicto y cómo se conectan personajes',
+                      'Escribir lo que quieran y después juntar',
+                      'Copiar una historia conocida'
+                    ],
+                    correct: 1,
+                    explanation: 'La coherencia narrativa requiere planificación colectiva: trama, ambientación y conexiones entre personajes'
+                  },
+                  {
+                    title: 'Fase 2: Desarrollo',
+                    description: 'Cada personaje debe tener profundidad',
+                    task: 'Un personaje bien desarrollado debe tener:',
+                    options: [
+                      'Solo nombre y apariencia',
+                      'Motivaciones, conflicto interno, evolución a lo largo de la historia',
+                      'Poderes mágicos',
+                      'Nombre largo y elegante'
+                    ],
+                    correct: 1,
+                    explanation: 'Los personajes complejos tienen motivaciones claras, enfrentan conflictos y cambian durante la narrativa'
+                  },
+                  {
+                    title: 'Fase 3: Revisión',
+                    description: 'Editen en equipo',
+                    task: 'En la revisión grupal, ¿qué es MÁS importante verificar?',
+                    options: [
+                      'Que suene bonito',
+                      'Coherencia narrativa, transiciones lógicas entre partes, ortografía',
+                      'Que sea largo',
+                      'Que tenga final feliz'
+                    ],
+                    correct: 1,
+                    explanation: 'La revisión debe asegurar que las partes individuales formen un todo coherente, con transiciones suaves y corrección lingüística'
+                  }
+                ]
+              }
+            },
+            {
+              id: 'challenge1',
+              type: 'Desafío',
+              title: 'Quiz Rápido: Matemáticas en Equipo',
+              description: '¡El primer gremio en resolver correctamente TODOS los problemas gana puntos extra!',
+              points: 200,
+              difficulty: 'Competitiva',
+              timeEstimate: '15 minutos',
+              icon: '⚡',
+              activity: {
+                type: 'speed',
+                problems: [
+                  {
+                    q: 'Un rectángulo tiene área de 48 cm² y ancho de 6 cm. ¿Cuál es su largo?',
+                    options: ['6 cm', '8 cm', '10 cm', '12 cm'],
+                    correct: 1,
+                    explanation: 'Área = largo × ancho. 48 = largo × 6, entonces largo = 48 ÷ 6 = 8 cm'
+                  },
+                  {
+                    q: 'Si 3 obreros construyen una pared en 6 días, ¿cuántos días tardarán 6 obreros?',
+                    options: ['3 días', '4 días', '12 días', '2 días'],
+                    correct: 0,
+                    explanation: 'Es inversamente proporcional: más obreros = menos tiempo. 6 obreros (el doble) = 3 días (la mitad)'
+                  },
+                  {
+                    q: 'Una tienda ofrece 25% de descuento y luego 10% adicional. Producto de $100, ¿precio final?',
+                    options: ['$65', '$67.50', '$70', '$75'],
+                    correct: 1,
+                    explanation: 'Primer descuento: $100 - 25% = $75. Segundo descuento: $75 - 10% = $67.50 (los descuentos NO se suman directamente)'
+                  },
+                  {
+                    q: 'Secuencia: 2, 6, 12, 20, 30, __ ¿Qué sigue?',
+                    options: ['40', '42', '44', '46'],
+                    correct: 1,
+                    explanation: 'Patrón: suma números pares (2+4=6, 6+6=12, 12+8=20, 20+10=30, 30+12=42)'
+                  },
+                  {
+                    q: 'Probabilidad de sacar una carta roja de un mazo estándar (52 cartas):',
+                    options: ['1/4', '1/3', '1/2', '2/3'],
+                    correct: 2,
+                    explanation: 'Hay 26 cartas rojas (corazones + diamantes) de 52 totales = 26/52 = 1/2'
+                  }
+                ]
+              }
+            }
+          ];
+
+          const guildPowers = [
+            { 
+              id: 'second_chance', 
+              name: 'Segunda Oportunidad', 
+              icon: '🔄',
+              description: 'Reenviar una misión para mejorar calificación',
+              cost: 500
+            },
+            { 
+              id: 'extra_time', 
+              name: 'Tiempo Extra', 
+              icon: '⏰',
+              description: '2 días adicionales en próxima misión',
+              cost: 500
+            },
+            { 
+              id: 'tutor_session', 
+              name: 'Tutoría Especial', 
+              icon: '👨‍🏫',
+              description: '15 min de ayuda extra del profesor',
+              cost: 500
+            },
+            { 
+              id: 'bonus_points', 
+              name: 'Bonus XP', 
+              icon: '⭐',
+              description: '50 puntos extra en misión elegida',
+              cost: 500
+            }
+          ];
+
+          const startMission = (mission, guild) => {
+            setActiveMission({ ...mission, guildId: guild.id, guildName: guild.name, guildIcon: guild.icon });
+            setMissionStep(0);
+            setTeamAnswers({});
+            setShowResult(null);
+          };
+
+          const submitPhaseAnswer = () => {
+            const currentPhase = activeMission.activity.type === 'speed' 
+              ? activeMission.activity.problems[missionStep]
+              : activeMission.activity.phases[missionStep];
+            
+            const userAnswer = teamAnswers[missionStep];
+            const isCorrect = userAnswer === currentPhase.correct;
+
+            setShowResult({
+              correct: isCorrect,
+              explanation: currentPhase.explanation
+            });
+          };
+
+          const nextPhase = () => {
+            const totalPhases = activeMission.activity.type === 'speed'
+              ? activeMission.activity.problems.length
+              : activeMission.activity.phases.length;
+
+            if (missionStep < totalPhases - 1) {
+              setMissionStep(missionStep + 1);
+              setShowResult(null);
+            } else {
+              completeMissionForGuild();
+            }
+          };
+
+          const completeMissionForGuild = () => {
+            const guildId = activeMission.guildId;
+            const missionId = activeMission.id;
+            const points = activeMission.points;
+
+            setGuilds(guilds.map(g => {
+              if (g.id === guildId && !g.completedMissions.includes(missionId)) {
+                return {
+                  ...g,
+                  points: g.points + points,
+                  completedMissions: [...g.completedMissions, missionId]
+                };
+              }
+              return g;
+            }));
+
+            setShowResult({
+              ...showResult,
+              missionComplete: true
+            });
+          };
+
+          const closeMission = () => {
+            setActiveMission(null);
+            setMissionStep(0);
+            setTeamAnswers({});
+            setShowResult(null);
+          };
+
+          const unlockPower = (guildId, powerId) => {
+            const guild = guilds.find(g => g.id === guildId);
+            if (guild && guild.points >= 500 && !guild.power) {
+              setGuilds(guilds.map(g => {
+                if (g.id === guildId) {
+                  return { ...g, power: powerId, points: g.points - 500 };
+                }
+                return g;
+              }));
+            }
+          };
+
+          const sortedGuilds = [...guilds].sort((a, b) => b.points - a.points);
+
+          // Misión Activa
+          if (activeMission) {
+            const isSpeedChallenge = activeMission.activity.type === 'speed';
+            const currentContent = isSpeedChallenge 
+              ? activeMission.activity.problems[missionStep]
+              : activeMission.activity.phases[missionStep];
+            
+            const totalSteps = isSpeedChallenge 
+              ? activeMission.activity.problems.length
+              : activeMission.activity.phases.length;
+
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 p-6">
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-2xl shadow-2xl p-8">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex items-center gap-4">
+                        <span className="text-6xl">{activeMission.icon}</span>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-3xl">{activeMission.guildIcon}</span>
+                            <h2 className="text-2xl font-bold text-gray-800">{activeMission.guildName}</h2>
+                          </div>
+                          <h3 className="text-xl font-bold text-purple-600">{activeMission.title}</h3>
+                          <p className="text-sm text-gray-600">
+                            {isSpeedChallenge ? 'Problema' : 'Fase'} {missionStep + 1} de {totalSteps}
+                          </p>
+                        </div>
+                      </div>
+                      <button onClick={closeMission} className="text-gray-400 hover:text-gray-600 text-3xl font-bold">
+                        ×
+                      </button>
+                    </div>
+
+                    <div className="mb-6">
+                      <div className="flex gap-2">
+                        {Array.from({ length: totalSteps }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={`h-2 flex-1 rounded-full ${
+                              i < missionStep ? 'bg-green-500' :
+                              i === missionStep ? 'bg-purple-500' :
+                              'bg-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {!showResult ? (
+                      <>
+                        <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-6 mb-6">
+                          {!isSpeedChallenge && (
+                            <>
+                              <h4 className="text-xl font-bold text-gray-800 mb-2">{currentContent.title}</h4>
+                              <p className="text-gray-600 mb-4">{currentContent.description}</p>
+                            </>
+                          )}
+                          <p className="text-lg font-semibold text-gray-800">
+                            {isSpeedChallenge ? currentContent.q : currentContent.task}
+                          </p>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                          {currentContent.options.map((option, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setTeamAnswers({ ...teamAnswers, [missionStep]: index })}
+                              className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                                teamAnswers[missionStep] === index
+                                  ? 'bg-purple-100 border-purple-500 font-bold'
+                                  : 'bg-white border-gray-300 hover:border-purple-300'
+                              }`}
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={submitPhaseAnswer}
+                          disabled={teamAnswers[missionStep] === undefined}
+                          className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          Enviar Respuesta del Equipo
+                        </button>
+                      </>
+                    ) : (
+                      <div className={`p-6 rounded-lg ${
+                        showResult.correct ? 'bg-green-50 border-2 border-green-500' : 'bg-red-50 border-2 border-red-500'
+                      }`}>
+                        <h3 className={`text-2xl font-bold mb-4 ${
+                          showResult.correct ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                          {showResult.correct ? '¡Correcto! 🎉' : 'Incorrecto 😔'}
+                        </h3>
+                        
+                        <div className="bg-white rounded-lg p-4 mb-4">
+                          <p className="font-semibold text-gray-700 mb-2">Explicación:</p>
+                          <p className="text-gray-600">{showResult.explanation}</p>
+                        </div>
+
+                        {showResult.missionComplete && (
+                          <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+                            <div className="flex items-center gap-3">
+                              <span className="text-4xl">🏆</span>
+                              <div>
+                                <p className="font-bold text-lg text-yellow-800">¡Misión Completada!</p>
+                                <p className="text-sm text-yellow-700">
+                                  +{activeMission.points} puntos para {activeMission.guildName}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <button
+                          onClick={showResult.missionComplete ? closeMission : nextPhase}
+                          className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-all"
+                        >
+                          {showResult.missionComplete ? 'Finalizar' : 'Siguiente Fase'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // Vista del Profesor
+          if (teacherMode) {
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-6">
+                <div className="max-w-7xl mx-auto">
+                  <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                          <span>🛡️</span>
+                          Guild System - Misiones Colaborativas
+                        </h1>
+                        <p className="text-gray-600 mt-2">Los gremios completan proyectos reales en equipo</p>
+                      </div>
+                      <button
+                        onClick={() => setTeacherMode(false)}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
+                      >
+                        Vista Estudiante
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-1">
+                      <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                          <span>🏆</span>
+                          Clasificación
+                        </h2>
+                        <div className="space-y-3">
+                          {sortedGuilds.map((guild, index) => (
+                            <div
+                              key={guild.id}
+                              className={`p-4 rounded-xl border-2 ${guild.color} cursor-pointer hover:scale-105 transition-all`}
+                              onClick={() => setSelectedGuild(guild)}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-2xl">{index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅'}</span>
+                                  <span className="text-3xl">{guild.icon}</span>
+                                  <span className="font-bold text-lg">{guild.name}</span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">{guild.members.length} miembros</span>
+                                <span className="font-bold text-xl text-purple-600">{guild.points} pts</span>
+                              </div>
+                              <div className="mt-2 text-xs text-gray-600">
+                                {guild.completedMissions.length}/{missions.length} misiones
+                              </div>
+                              {guild.power && (
+                                <div className="mt-2 text-xs bg-yellow-100 px-2 py-1 rounded-full inline-flex items-center gap-1">
+                                  {guildPowers.find(p => p.id === guild.power)?.icon}
+                                  <span className="font-semibold">Poder Activo</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl shadow-xl p-6">
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                          <span>⭐</span>
+                          Poderes (500 pts)
+                        </h3>
+                        <div className="space-y-2">
+                          {guildPowers.map(power => (
+                            <div key={power.id} className="bg-white rounded-lg p-3 border border-orange-300">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">{power.icon}</span>
+<div>
+                                  <p className="font-bold text-sm">{power.name}</p>
+                                  <p className="text-xs text-gray-600">{power.description}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="lg:col-span-2">
+                      <div className="bg-white rounded-2xl shadow-xl p-6">
+                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                          <span>🎯</span>
+                          Misiones Disponibles
+                        </h2>
+
+                        <div className="space-y-4">
+                          {missions.map(mission => (
+                            <div key={mission.id} className="border-2 border-gray-300 rounded-xl p-5 hover:border-purple-400 transition-all">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex items-center gap-3 flex-1">
+                                  <span className="text-4xl">{mission.icon}</span>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                        mission.type === 'Principal' ? 'bg-blue-100 text-blue-700' :
+                                        mission.type === 'Secundaria' ? 'bg-purple-100 text-purple-700' :
+                                        'bg-red-100 text-red-700'
+                                      }`}>
+                                        {mission.type}
+                                      </span>
+                                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                        mission.difficulty === 'Media' ? 'bg-yellow-100 text-yellow-700' :
+                                        mission.difficulty === 'Alta' ? 'bg-red-100 text-red-700' :
+                                        'bg-orange-100 text-orange-700'
+                                      }`}>
+                                        {mission.difficulty}
+                                      </span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-800">{mission.title}</h3>
+                                    <p className="text-gray-600 text-sm mt-1">{mission.description}</p>
+                                    <p className="text-xs text-gray-500 mt-1">⏱️ {mission.timeEstimate}</p>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-right ml-4">
+                                  <div className="text-3xl font-bold text-purple-600 flex items-center gap-1">
+                                    <span>⚡</span>
+                                    {mission.points}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-4 pt-4 border-t-2 border-gray-200">
+                                <p className="text-sm font-semibold text-gray-700 mb-2">Iniciar misión para:</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {guilds.map(guild => (
+                                    <button
+                                      key={guild.id}
+                                      onClick={() => startMission(mission, guild)}
+                                      disabled={guild.completedMissions.includes(mission.id)}
+                                      className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all ${
+                                        guild.completedMissions.includes(mission.id)
+                                          ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                          : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                      }`}
+                                    >
+                                      {guild.icon} {guild.name}
+                                      {guild.completedMissions.includes(mission.id) && ' ✓'}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedGuild && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-start mb-6">
+                          <div className="flex items-center gap-3">
+                            <span className="text-5xl">{selectedGuild.icon}</span>
+                            <div>
+                              <h2 className="text-3xl font-bold text-gray-800">{selectedGuild.name}</h2>
+                              <p className="text-gray-600">Detalles del Gremio</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setSelectedGuild(null)}
+                            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="bg-purple-50 rounded-lg p-4">
+                            <h3 className="font-bold text-lg mb-2">Puntuación Total</h3>
+                            <p className="text-4xl font-bold text-purple-600">{selectedGuild.points} puntos</p>
+                          </div>
+
+                          <div className="bg-blue-50 rounded-lg p-4">
+                            <h3 className="font-bold text-lg mb-2">Miembros del Equipo</h3>
+                            <div className="grid grid-cols-2 gap-2">
+                              {selectedGuild.members.map((member, i) => (
+                                <div key={i} className="px-3 py-2 bg-blue-200 text-blue-800 rounded-lg font-semibold text-sm">
+                                  {member}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="bg-green-50 rounded-lg p-4">
+                            <h3 className="font-bold text-lg mb-2">Progreso de Misiones</h3>
+                            <p className="text-2xl font-bold text-green-600 mb-2">
+                              {selectedGuild.completedMissions.length} / {missions.length}
+                            </p>
+                            <div className="space-y-2">
+                              {missions.map(m => (
+                                <div key={m.id} className="flex items-center gap-2 text-sm">
+                                  {selectedGuild.completedMissions.includes(m.id) ? (
+                                    <span className="text-green-600">✓</span>
+                                  ) : (
+                                    <div className="w-4 h-4 border-2 border-gray-300 rounded-full" />
+                                  )}
+                                  <span className={selectedGuild.completedMissions.includes(m.id) ? 'text-green-700 font-semibold' : 'text-gray-600'}>
+                                    {m.title}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {selectedGuild.power && (
+                            <div className="bg-yellow-50 rounded-lg p-4 border-2 border-yellow-400">
+                              <h3 className="font-bold text-lg mb-2">Poder Activo</h3>
+                              <div className="flex items-center gap-2">
+                                <span className="text-3xl">{guildPowers.find(p => p.id === selectedGuild.power)?.icon}</span>
+                                <div>
+                                  <p className="font-bold">{guildPowers.find(p => p.id === selectedGuild.power)?.name}</p>
+                                  <p className="text-sm text-gray-600">{guildPowers.find(p => p.id === selectedGuild.power)?.description}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {!selectedGuild.power && selectedGuild.points >= 500 && (
+                            <div className="bg-orange-50 rounded-lg p-4">
+                              <h3 className="font-bold text-lg mb-3">Desbloquear Poder (500 pts)</h3>
+                              <div className="grid grid-cols-2 gap-2">
+                                {guildPowers.map(power => (
+                                  <button
+                                    key={power.id}
+                                    onClick={() => { unlockPower(selectedGuild.id, power.id); setSelectedGuild(null); }}
+                                    className="p-3 bg-orange-200 hover:bg-orange-300 rounded-lg text-left transition-all"
+                                  >
+                                    <div className="text-2xl mb-1">{power.icon}</div>
+                                    <p className="font-bold text-xs">{power.name}</p>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          // Vista del Estudiante
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+              <div className="max-w-6xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                        <span>👥</span>
+                        Guild System - Vista Estudiante
+                      </h1>
+                      <p className="text-gray-600 mt-2">Completa proyectos colaborativos reales con tu equipo</p>
+                    </div>
+                    <button
+                      onClick={() => setTeacherMode(true)}
+                      className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-all"
+                    >
+                      Panel Docente
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <span>👑</span>
+                    Tabla de Clasificación
+                  </h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {sortedGuilds.map((guild, index) => (
+                      <div key={guild.id} className={`p-6 rounded-xl border-4 ${guild.color} text-center`}>
+                        <div className="text-4xl mb-2">
+                          {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅'}
+                        </div>
+                        <div className="text-5xl mb-2">{guild.icon}</div>
+                        <h3 className="text-xl font-bold mb-2">{guild.name}</h3>
+                        <p className="text-3xl font-bold text-purple-600 mb-2">{guild.points}</p>
+                        <p className="text-sm text-gray-600">Posición #{index + 1}</p>
+                        <div className="mt-2 text-xs text-gray-600">
+                          {guild.completedMissions.length}/{missions.length} misiones
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-xl p-6">
+                  <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <span>🎯</span>
+                    Misiones Disponibles
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {missions.map(mission => (
+                      <div key={mission.id} className="border-2 border-gray-300 rounded-xl p-5 hover:shadow-lg transition-all">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="text-5xl">{mission.icon}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                mission.type === 'Principal' ? 'bg-blue-100 text-blue-700' :
+                                mission.type === 'Secundaria' ? 'bg-purple-100 text-purple-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {mission.type}
+                              </span>
+                              <span className="text-xl font-bold text-purple-600">+{mission.points}</span>
+                            </div>
+                            <h3 className="text-lg font-bold">{mission.title}</h3>
+                          </div>
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 mb-2">{mission.description}</p>
+                        <p className="text-xs text-gray-500">⏱️ Tiempo estimado: {mission.timeEstimate}</p>
+                        
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs font-semibold text-gray-600 mb-1">Esta misión incluye:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {mission.activity.type === 'speed' ? (
+                              <span className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded">
+                                {mission.activity.problems.length} problemas rápidos
+                              </span>
+                            ) : (
+                              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                {mission.activity.phases.length} fases colaborativas
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl shadow-xl p-6 mt-6">
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <span>🎖️</span>
+                    Cómo Funciona
+                  </h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">1.</span>
+                      <span>Tu docente iniciará una misión para tu gremio desde el Panel Docente</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">2.</span>
+                      <span>Trabajen juntos como equipo para completar cada fase de la misión</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">3.</span>
+                      <span>Discutan las respuestas antes de enviar (¡solo tienen una oportunidad por fase!)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">4.</span>
+                      <span>Acumulen 500 puntos para desbloquear un Poder Especial de Gremio</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<GuildSystem />);
+    </script>
+</body>
+</html>
